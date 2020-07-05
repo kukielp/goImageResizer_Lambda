@@ -55,12 +55,12 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		imgHeightString, errHeight = url.QueryUnescape(imgHeightString)
 
 		if nil != errImg || nil != errWidth || nil != errHeight {
-			log.Fatal(errImg, errWidth)
+			log.Fatal(errImg, errWidth, errImg)
 		} else {
 			imgWidth, errCWidth := strconv.Atoi(imgWidthString)
 			imgHeight, errCHeight := strconv.Atoi(imgHeightString)
 			if nil != errCWidth && nil != errCHeight {
-				log.Fatal(errCWidth)
+				log.Fatal(errCWidth, errCHeight)
 			}
 			newImage := ResizeImage(imgUrl, uint(imgWidth), uint(imgHeight))
 			response = prepareResponse(newImage)
