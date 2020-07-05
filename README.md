@@ -31,7 +31,7 @@ This is a simple program that run in AWS Lambda it performs the following:
 
 ## Setup process
 
-### Installing dependencies & building the target 
+### Installisng dependencies & building the target 
 
 In this example we use the built-in `sam build` to automatically download all the dependencies and package our build target.   
 Read more about [SAM Build here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-build.html) 

@@ -36,7 +36,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	imgUrl, urlFound := request.QueryStringParameters["url"]
 	imgWidthString, widthFound := request.QueryStringParameters["width"]
 	imgHeightString, heightFound := request.QueryStringParameters["height"]
-	var resposne events.APIGatewayProxyResponse
+	var response events.APIGatewayProxyResponse
 	if urlFound && (widthFound || heightFound) {
 
 		if !widthFound && heightFound {
@@ -63,21 +63,24 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 				log.Fatal(errCWidth)
 			}
 			newImage := ResizeImage(imgUrl, uint(imgWidth), uint(imgHeight))
-			resposne = prepareResponse(newImage)
+			response = prepareResponse(newImage)
 		}
 	} else {
 		// Some parameters were not passed in.
-		resposne = prepareResponse(makeError())
+		response = prepareResponse(makeError())
 	}
 
-	return resposne, nil
+	return response, nil
 }
 
 func makeError() imagResultFormat {
 	buf := bytes.NewBuffer(nil)
 	//Exist's in the base as an asset ( ~75k image size )
-	f, _ := os.Open("error.jpg") // Error handling elided for brevity.
-	io.Copy(buf, f)              // Error handling elided for brevity.
+	f, err := os.Open("error.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+	io.Copy(buf,f)
 	f.Close()
 	var imageTypeResponse imagResultFormat
 	imageTypeResponse.headerType = "image/jpeg"
@@ -134,7 +137,7 @@ func ResizeImage(Path string, Width uint, Height uint) imagResultFormat {
 		newImage := resizer.Resize(Width, Height, img, resizer.Lanczos3)
 		err = jpeg.Encode(&imageBuf, newImage, nil)
 		if err != nil {
-
+			log.Fatal(err)
 		}
 	case "image/png":
 		imageTypeResponse.headerType = "image/png"
@@ -144,8 +147,11 @@ func ResizeImage(Path string, Width uint, Height uint) imagResultFormat {
 		}
 		newImage := resizer.Resize(Width, Height, img, resizer.Lanczos3)
 		err = png.Encode(&imageBuf, newImage)
-	default:
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
+		default:
+			log.Fatal(err)
 	}
 
 	imageTypeResponse.base64String = base64.StdEncoding.EncodeToString(imageBuf.Bytes())
